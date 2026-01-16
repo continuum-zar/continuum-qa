@@ -28,25 +28,26 @@ jobs:
           docker compose up -d
           echo "Waiting for services to be healthy..."
           
-          # Wait up to 90 seconds
-          for i in {1..18}; do
-            # Check if backend specifically is healthy
-            if docker compose ps | grep "backend" | grep "healthy" > /dev/null; then
+          # Wait up to 60 seconds for the healthcheck to propagate
+          for i in {1..12}; do
+            # Check status of backend
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q backend))
+            if [ "$STATUS" == "healthy" ]; then
               echo "Backend is healthy!"
               exit 0
             fi
-            echo "Waiting for healthchecks... ($((i*5))s/90s)"
+            echo "Current status: $STATUS... waiting ($((i*5))s/60s)"
             sleep 5
           done
           
           echo "Error: Backend did not become healthy in time."
           docker compose ps
-          docker compose logs
+          docker compose logs backend
           exit 1
           
       - name: Verify API Reachability
         run: |
-          # The backend is mapped to 8001 on the host
+          # Verify we can reach it from the runner host
           curl -v http://localhost:8001/health
 
       - name: Shutdown

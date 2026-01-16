@@ -1,8 +1,9 @@
-# Corrected Railway configuration
+# Force Railway to use Docker
 [build]
-dockercompose_path = "docker-compose.yml"
+builder = "DOCKER"
+dockerfile = "Dockerfile"
 
 [deploy]
-restartPolicy = "ON_FAILURE"
 healthcheckPath = "/health"
 healthcheckTimeout = 120
+restartPolicyType = "on-failure"

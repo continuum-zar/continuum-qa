@@ -1,9 +1,8 @@
+# Corrected Railway configuration
 [build]
-builder = "docker-compose"
 dockercompose_path = "docker-compose.yml"
 
 [deploy]
-startCommand = "docker-compose up"
+restartPolicy = "ON_FAILURE"
 healthcheckPath = "/health"
 healthcheckTimeout = 120
-restartPolicyType = "on-failure"

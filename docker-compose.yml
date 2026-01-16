@@ -1,47 +1,23 @@
 services:
   backend:
     image: ghcr.io/continuum-zar/continuum-backend:latest
-    container_name: continuum-backend-qa
     environment:
-      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
-    ports:
-      - "8001:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  frontend:
-    image: ghcr.io/continuum-zar/continuum-frontend:latest
-    container_name: continuum-frontend-qa
-    environment:
-      VITE_API_BASE_URL: http://localhost:8001/api
-    ports:
-      - "5174:5173"
-    depends_on:
-      - backend
-    restart: always
+      - DATABASE_URL=${{Postgres.DATABASE_URL}}
+      - PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   db:
     image: postgres:16
-    container_name: continuum-db-qa
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
-    ports:
-      - "5435:5432"
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=app
+      - POSTGRES_DB=app
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app"]
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: always
-
-  mailpit:
-    image: axllent/mailpit
-    container_name: continuum-mailpit-qa
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    restart: always

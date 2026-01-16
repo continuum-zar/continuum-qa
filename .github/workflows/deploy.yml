@@ -21,7 +21,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull latest images
-        run: docker compose pull
+        run: |
+          # We use || true because if the image hasn't been built yet, we don't want the whole workflow to crash
+          # but the manifest unknown error will persist until the build-and-push jobs run.
+          docker compose pull || echo "Warning: Some images could not be pulled. Ensure Build and Push workflows have finished in FE and BE repos."
 
       - name: Restart services
         run: docker compose up -d

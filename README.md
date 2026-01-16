@@ -15,6 +15,21 @@ Images are automatically built and pushed to GHCR (GitHub Container Registry) by
 - **Database:** PostgreSQL 16
 - **Mail:** Mailpit (SMTP testing)
 
+## Important: First-Time Setup
+
+Since GHCR packages are private by default, you must do the following for the QA repo to be able to pull images:
+
+1.  **Run the Build Workflows:** Push to `master`/`main` in both `continuum-frontend` and `continuum-backend` to trigger the first build.
+2.  **Grant Access:**
+    *   Go to your GitHub Profile -> **Packages**.
+    *   Find `continuum-backend` and `continuum-frontend`.
+    *   Go to **Package Settings** for each.
+    *   Under "Manage Actions access", click **Add repository**.
+    *   Add `continuum-zar/continuum-qa` and give it **Read** access.
+    *   *Alternatively*, change the package visibility to **Public**.
+
+---
+
 ## How to Deploy
 
 The deployment is managed via GitHub Actions.

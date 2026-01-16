@@ -2,10 +2,10 @@ services:
   backend:
     image: ghcr.io/continuum-zar/continuum-backend:latest
     environment:
-      - DATABASE_URL=${{Postgres.DATABASE_URL}}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://app:app@db:5432/app}
       - PORT=8000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -21,3 +21,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"

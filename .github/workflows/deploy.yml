@@ -1,16 +1,16 @@
-name: Deploy QA Environment
+name: QA Stack Verification
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "master", "main" ]
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  verify-stack:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout QA repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to GHCR
@@ -20,11 +20,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull latest images
-        run: |
-          # We use || true because if the image hasn't been built yet, we don't want the whole workflow to crash
-          # but the manifest unknown error will persist until the build-and-push jobs run.
-          docker compose pull || echo "Warning: Some images could not be pulled. Ensure Build and Push workflows have finished in FE and BE repos."
+      - name: Pull images
+        run: docker compose pull
 
-      - name: Restart services
-        run: docker compose up -d
+      - name: Test Start Stack
+        run: |
+          docker compose up -d
+          echo "Waiting for services to be healthy..."
+          sleep 20
+          docker compose ps
+          
+      - name: Check Backend Health
+        run: |
+          curl -v http://localhost:8001/health || (docker compose logs backend && exit 1)
+
+      - name: Shutdown
+        run: docker compose down
